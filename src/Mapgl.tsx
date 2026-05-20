@@ -8,7 +8,7 @@ import { useControlRotateClockwise } from './useControlRotateClockwise';
 import { ControlRotateCounterclockwise } from './ControlRotateConterclockwise';
 import { MapWrapper } from './MapWrapper';
 
-export const MAP_CENTER = [55.31878, 25.23584];
+export const MAP_CENTER = [37.617348, 54.193122];
 
 export default function Mapgl() {
     const { setMapglContext } = useMapglContext();
@@ -21,8 +21,9 @@ export default function Mapgl() {
         load().then((mapgl) => {
             map = new mapgl.Map('map-container', {
                 center: MAP_CENTER,
-                zoom: 13,
-                key: 'a1893935-6834-4445-b97a-3405fb426c5b',
+                zoom: 14.5,
+                key: '98c5508d-3e0c-480c-9ace-9037d996cd2e',
+                style: '86ae2ed6-9acf-4b9b-998f-1742b5de9656',
             });
 
             map.on('click', (e) => console.log(e));
