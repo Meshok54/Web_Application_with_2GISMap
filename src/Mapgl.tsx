@@ -16,7 +16,7 @@ export default function Mapgl() {
     const { setMapglContext } = useMapglContext();
 
     useEffect(() => {
-        let map: mapgl.Map | undefined = undefined;
+        let map: any = undefined;
 
         load().then((mapgl) => {
             map = new mapgl.Map('map-container', {
@@ -26,28 +26,28 @@ export default function Mapgl() {
                 style: '86ae2ed6-9acf-4b9b-998f-1742b5de9656',
             });
 
-            map.on('click', (e) => console.log(e));
+            map.on('click', (e: any) => console.log(e));
 
             const data = geoData as FeatureCollection<Geometry, GeoJsonProperties>;
             console.log('Всего объектов в файле:', data.features?.length);
 
-            // ИСТОЧНИК ДАННЫХ (один для всех слоёв)
             const source = new mapgl.GeoJsonSource(map, {
                 data: data,
-                attributes: {
-                    visible: true
-                }
+                attributes: { visible: true },
             });
 
-            // СЛОЙ 1: Точечный слой с иконками и подписями
+            // СЛОЙ 1: Точечный слой
             const pointLayer = {
                 id: 'dtp-points-layer',
                 filter: [
-                    'match',
-                    ['sourceAttr', 'visible'],
-                    [true],
-                    true,
-                    false
+                    'all',
+                    [
+                        'match',
+                        ['sourceAttr', 'visible'],
+                        [true],
+                        true,
+                        false,
+                    ],
                 ],
                 type: 'point',
                 minzoom: 12,
@@ -69,8 +69,8 @@ export default function Mapgl() {
                     textHaloWidth: 2,
                     iconPriority: 100,
                     textPriority: 100,
-                    textOffset: [0, -1.5]
-                }
+                    textOffset: [0, -1.5],
+                },
             };
 
             // СЛОЙ 2: Тепловая карта
@@ -81,7 +81,7 @@ export default function Mapgl() {
                     ['sourceAttr', 'visible'],
                     [true],
                     true,
-                    false
+                    false,
                 ],
                 type: 'heatmap',
                 minzoom: 5,
@@ -98,15 +98,18 @@ export default function Mapgl() {
                         0.8, '#ED4C59',
                         1, 'rgba(255, 255, 255, 1)'
                     ],
-                    radius: 25,
+                    radius: 50,
                     intensity: 0.8,
                     opacity: 0.8,
-                    downscale: 1
-                }
+                    downscale: 1,
+                },
             };
 
             map.on('styleload', () => {
                 map?.addLayer(heatmapLayer);
+            });
+
+            map.once('styleload', () => {
                 map?.addLayer(pointLayer);
                 console.log('Тепловая карта и точечный слой добавлены!');
             });
