@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/Web_Application_with_2GISMap/static/css/main.397c9047.css",
+    "main.js": "/Web_Application_with_2GISMap/static/js/main.554f74de.js",
+    "index.html": "/Web_Application_with_2GISMap/index.html",
+    "main.397c9047.css.map": "/Web_Application_with_2GISMap/static/css/main.397c9047.css.map",
+    "main.554f74de.js.map": "/Web_Application_with_2GISMap/static/js/main.554f74de.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.397c9047.css",
+    "static/js/main.554f74de.js"
+  ]
+}
