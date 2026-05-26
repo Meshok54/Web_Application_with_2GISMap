@@ -15,109 +15,77 @@ export default function Mapgl() {
     const { setMapglContext } = useMapglContext();
 
     useEffect(() => {
-        let map: any = undefined;
-        let directions: any = undefined;
-        let clusterer: any = undefined;
+        let map: mapgl.Map | undefined = undefined;
 
-        load().then((mapglInstance) => {
-            if (!map) {
-                map = new mapglInstance.Map('map-container', {
-                    center: MAP_CENTER,
-                    zoom: 14.5,
-                    key: '98c5508d-3e0c-480c-9ace-9037d996cd2e',
-                    style: '86ae2ed6-9acf-4b9b-998f-1742b5de9656',
-                });
-            }
+        load().then((mapgl) => {
+            map = new mapgl.Map('map-container', {
+                center: MAP_CENTER,
+                zoom: 14.5,
+                key: '98c5508d-3e0c-480c-9ace-9037d996cd2e',
+                style: '86ae2ed6-9acf-4b9b-998f-1742b5de9656',
+            });
 
-            map.on('click', (e: any) => console.log(e));
+            map.on('click', (e) => console.log(e));
 
-            // Загрузка данных
             const data = geoData as FeatureCollection<Geometry, GeoJsonProperties>;
             console.log('Всего объектов в файле:', data.features?.length);
 
-            map.on('styleload', () => {
-                console.log('Стиль карты загружен, добавляем слой...');
-
-                // 0. СОЗДАЕМ ИСТОЧНИК ДАННЫХ (Строго по методичке!)
-                const source = new mapglInstance.GeoJsonSource(map, {
-                    data: data,
-                    attributes: {
-                        visible: true // Уникальное свойство для фильтра
-                    }
-                });
-
-                // 1. Создаем слой для отрисовки КРУЖОЧКОВ ДТП
-                const circleLayer = {
-                    id: 'dtp-circles-layer',
-                    type: 'circle',
-                    source: source, // <-- Ссылаемся на созданную переменную source
-                    filter: [
-                        'match',
-                        ['sourceAttr', 'visible'],
-                        [true],
-                        true,
-                        false
-                    ],
-                    style: {
-                        circleColor: [
-                            'match',
-                            ['get', 'severity'],
-                            'С погибшими', '#ff0000',
-                            'Тяжёлый', '#ff6600',
-                            'Легкий', '#0098ea',
-                            '#0098ea'
-                        ],
-                        circleRadius: 8,
-                        circleStrokeColor: '#ffffff',
-                        circleStrokeWidth: 2
-                    }
-                };
-
-                // 2. Создаем отдельный слой для ТЕКСТОВЫХ подписей
-                const textLayer = {
-                    id: 'dtp-text-layer',
-                    type: 'point',
-                    source: source, // <-- Ссылаемся на ту же переменную source
-                    filter: [
-                        'match',
-                        ['sourceAttr', 'visible'],
-                        [true],
-                        true,
-                        false
-                    ],
-                    style: {
-                        iconWidth: 0, // Прячем системную иконку, оставляем только текст
-                        textField: ['get', 'category'],
-                        textFont: ['Noto_Sans', 'Arial', 'sans-serif'],
-                        textSize: 12,
-                        textColor: '#1a1a1a',
-                        textHaloColor: '#ffffff',
-                        textHaloWidth: 2,
-                        textPriority: 100,
-                        textOffset: [0, -1.5]
-                    }
-                };
-
-                // Добавляем оба слоя на карту
-                
-                map.addLayer(textLayer);
-                map.addLayer(circleLayer);
-
-                console.log('Слои с точками и текстом ДТП успешно добавлены!');
+            const source = new mapgl.GeoJsonSource(map, {
+                data: data,
+                attributes: {
+                    visible: true
+                }
             });
 
-            const rulerControl = new RulerControl(map, {});
+            const layer = {
+                id: 'dtp-points-layer',
+                filter: [
+                    'match',
+                    ['sourceAttr', 'visible'],
+                    [true],
+                    true,
+                    false
+                ],
+                type: 'point',
+                style: {
+                    iconImage: 'caution',  // Это иконка из моего 2gis стиля
+                    iconWidth: 20,
+                    iconHeight: 20,
+                    
+                    // Подпись: категория + тяжесть
+                    textField: [
+                        'concat',
+                        ['get', 'category'],
+                        '\n',
+                        ['get', 'severity']
+                    ],
+                    textFont: ['Noto_Sans', 'Arial', 'sans-serif'],
+                    textSize: 10,
+                    textColor: '#ff6600',
+                    textHaloColor: '#ffffff',
+                    textHaloWidth: 2,
+                    iconPriority: 100,
+                    textPriority: 100,
+                    textOffset: [0, -1.5]
+                }
+            };
+
+
+            map.on('styleload', () => {
+                map?.addLayer(layer);
+                console.log('Слой с точками и подписями ДТП добавлен!');
+            });
+
+            const rulerControl = new RulerControl(map, { position: 'centerRight' });
 
             setMapglContext({
                 mapglInstance: map,
                 rulerControl,
-                mapgl: mapglInstance,
+                mapgl,
             });
         });
 
         return () => {
-            directions?.clear();
-            clusterer?.destroy();
             map?.destroy();
             setMapglContext({ mapglInstance: undefined, mapgl: undefined });
         };
