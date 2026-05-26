@@ -1,7 +1,7 @@
 {
   "name": "mapgl-react-app",
   "version": "0.1.0",
-  "homepage": "https://Meshok54.github.io/Web_Application_with_2GISMap",
+  "homepage": "https://meshok54.github.io/Web_Application_with_2GISMap",
   "private": true,
   "dependencies": {
     "@2gis/mapgl": "^1.31.1",

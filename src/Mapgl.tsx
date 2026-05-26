@@ -7,8 +7,8 @@ import { ControlRotateCounterclockwise } from './ControlRotateConterclockwise';
 import { MapWrapper } from './MapWrapper';
 
 import { FeatureCollection, Geometry, GeoJsonProperties } from 'geojson';
-import geoData from './data/tulskaia-oblast.json';
-// import geoData from './data/data.json';
+// import geoData from './data/tulskaia-oblast.json';
+import geoData from './data/data.json';
 
 export const MAP_CENTER = [37.617348, 54.193122];
 
