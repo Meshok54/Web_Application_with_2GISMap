@@ -7,7 +7,8 @@ import { ControlRotateCounterclockwise } from './ControlRotateConterclockwise';
 import { MapWrapper } from './MapWrapper';
 
 import { FeatureCollection, Geometry, GeoJsonProperties } from 'geojson';
-import geoData from './data/data.json';
+import geoData from './data/tulskaia-oblast.json';
+// import geoData from './data/data.json';
 
 export const MAP_CENTER = [37.617348, 54.193122];
 
@@ -30,6 +31,7 @@ export default function Mapgl() {
             const data = geoData as FeatureCollection<Geometry, GeoJsonProperties>;
             console.log('Всего объектов в файле:', data.features?.length);
 
+            // ИСТОЧНИК ДАННЫХ (один для всех слоёв)
             const source = new mapgl.GeoJsonSource(map, {
                 data: data,
                 attributes: {
@@ -37,7 +39,8 @@ export default function Mapgl() {
                 }
             });
 
-            const layer = {
+            // СЛОЙ 1: Точечный слой с иконками и подписями
+            const pointLayer = {
                 id: 'dtp-points-layer',
                 filter: [
                     'match',
@@ -47,12 +50,12 @@ export default function Mapgl() {
                     false
                 ],
                 type: 'point',
+                minzoom: 12,
+                maxzoom: 20,
                 style: {
-                    iconImage: 'caution',  // Это иконка из моего 2gis стиля
+                    iconImage: 'caution',
                     iconWidth: 20,
                     iconHeight: 20,
-                    
-                    // Подпись: категория + тяжесть
                     textField: [
                         'concat',
                         ['get', 'category'],
@@ -61,7 +64,7 @@ export default function Mapgl() {
                     ],
                     textFont: ['Noto_Sans', 'Arial', 'sans-serif'],
                     textSize: 10,
-                    textColor: '#ff6600',
+                    textColor: '#000000',
                     textHaloColor: '#ffffff',
                     textHaloWidth: 2,
                     iconPriority: 100,
@@ -70,10 +73,42 @@ export default function Mapgl() {
                 }
             };
 
+            // СЛОЙ 2: Тепловая карта
+            const heatmapLayer = {
+                id: 'dtp-heatmap-layer',
+                filter: [
+                    'match',
+                    ['sourceAttr', 'visible'],
+                    [true],
+                    true,
+                    false
+                ],
+                type: 'heatmap',
+                minzoom: 5,
+                maxzoom: 20,
+                style: {
+                    color: [
+                        'interpolate',
+                        ['linear'],
+                        ['heatmap-density'],
+                        0, 'rgba(0, 0, 0, 0)',
+                        0.2, '#FF6B42',
+                        0.4, '#FFA4AA',
+                        0.6, '#F87A56',
+                        0.8, '#ED4C59',
+                        1, 'rgba(255, 255, 255, 1)'
+                    ],
+                    radius: 25,
+                    intensity: 0.8,
+                    opacity: 0.8,
+                    downscale: 1
+                }
+            };
 
             map.on('styleload', () => {
-                map?.addLayer(layer);
-                console.log('Слой с точками и подписями ДТП добавлен!');
+                map?.addLayer(heatmapLayer);
+                map?.addLayer(pointLayer);
+                console.log('Тепловая карта и точечный слой добавлены!');
             });
 
             const rulerControl = new RulerControl(map, { position: 'centerRight' });
